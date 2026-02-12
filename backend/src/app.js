@@ -6,6 +6,7 @@ const app = express();
 const PORT = 3000;
 
 // Routes
+app.use(express.json()); // Middleware para parsear JSON en las solicitudes
 app.use('/tasks', taskRoutes);
 
 app.listen(PORT, () => 
