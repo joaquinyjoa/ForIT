@@ -1,16 +1,12 @@
 const express = require("express");
 
+const taskRoutes = require('./routes/taskRoutes');
+
 const app = express();
 const PORT = 3000;
 
-//Middleware
-app.use(express.json());
-
-//prueba
-app.get("/", (req, res) => 
-    {
-        res.send("Servidor funcionando");
-    });
+// Routes
+app.use('/tasks', taskRoutes);
 
 app.listen(PORT, () => 
     {
