@@ -2,9 +2,10 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
+require('dotenv').config(); // Cargar variables de entorno
 
 // Nombre del archivo de la base de datos y consulta para crear la tabla
-const nombreArchivo = 'tasks.db';
+const nombreArchivo = process.env.NOMBREARCHIVO || 'tasks.db';
 const createTableQuery = `CREATE TABLE IF NOT EXISTS tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,

@@ -49,14 +49,30 @@ const updateTask = (id, title, description, completed) => {
 
 const deleteTask = (id) => {
     return new Promise((resolve, reject) => {
-        // Consulta para eliminar una tarea por su ID
+        // Consulta para eliminar una tarea por su ID y reiniciar la secuencia de autoincremento si la tabla queda vacía
         const query = "DELETE FROM tasks WHERE id = ?";
+        const countQuery = "SELECT COUNT(*) AS total FROM tasks";
+        const deleteSequenceQuery = "DELETE FROM sqlite_sequence WHERE name = 'tasks'";
         const respuesta = "Tarea eliminada correctamente";
 
         db.run(query, [id], function(err) {
             if (err) {
                 reject(err);
             } else {
+                // Verificar si la tabla está vacía después de eliminar la tarea
+                db.get(countQuery, [], (err, row) => {
+                    if (err) {
+                        reject(err);
+                    } else if (row.total === 0) {
+                        // Si la tabla está vacía, reiniciar la secuencia de autoincremento
+                        db.run(deleteSequenceQuery, [], (err) => {
+                            if (err) {
+                                reject(err);
+                            }}
+                        );
+                    }
+                });
+
                 resolve({ message: respuesta });
             }
         });
