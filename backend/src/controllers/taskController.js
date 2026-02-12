@@ -21,7 +21,7 @@ class TaskController {
         const { title, description } = req.body;
 
         // Validar que title y description no estén vacíos
-        const validation = validarTaskInput(title, description);
+        const validation = this.validarTaskInput(title, description);
 
         if (!validation.valid) {
             return res.status(400).json({ error: validation.message });
@@ -39,8 +39,8 @@ class TaskController {
         const { id } = req.params;
         const { title, description, completed } = req.body;
         // Validar entrada
-        const validation = validarTaskInput(title, description);
-        const completionValidation = validarTaskCompletionInput(completed);
+        const validation = this.validarTaskInput(title, description);
+        const completionValidation = this.validarTaskCompletionInput(completed);
 
         if (!completionValidation.valid) {
             return res.status(400).json({ error: completionValidation.message });
@@ -55,6 +55,17 @@ class TaskController {
             return res.status(200).json(updatedTask);
         } catch (error) {
             return res.status(500).json({ error: 'Error al actualizar tarea' });
+        }
+    }
+
+    static deleteTaskController = async (req, res) => {
+        const { id } = req.params;
+
+        try {
+            const result = await taskModel.deleteTask(id);
+            return res.status(200).json(result);
+        } catch (error) {
+            return res.status(500).json({ error: 'Error al eliminar tarea' });
         }
     }
 
