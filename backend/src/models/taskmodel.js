@@ -47,4 +47,20 @@ const updateTask = (id, title, description, completed) => {
     });
 }
 
-module.exports = { getTasks, createTask, updateTask };
+const deleteTask = (id) => {
+    return new Promise((resolve, reject) => {
+        // Consulta para eliminar una tarea por su ID
+        const query = "DELETE FROM tasks WHERE id = ?";
+        const respuesta = "Tarea eliminada correctamente";
+
+        db.run(query, [id], function(err) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({ message: respuesta });
+            }
+        });
+    });
+}
+
+module.exports = { getTasks, createTask, updateTask, deleteTask };

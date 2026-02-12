@@ -1,99 +1,102 @@
-const e = require('express');
 const taskModel = require('../models/taskmodel');
 
-const getTasksController = async (req, res) => {
-    try {
-        const tasks = await taskModel.getTasks();
+class TaskController {
+    static  getTasksController = async (req, res) => {
+        try {
+            const tasks = await taskModel.getTasks();
 
-        if (!tasks || tasks.length === 0) {
-            return res.status(404).json({ error: 'No se encontraron tareas' });
+            if (!tasks || tasks.length === 0) {
+                return res.status(404).json({ error: 'No se encontraron tareas' });
+            }
+
+            return res.status(200).json(tasks);
+            
+        } catch (error) {
+            return res.status(500).json({ error: 'Error al obtener tareas' });
+        }
+    }
+
+    static createTaskController = async (req, res) => {
+        // Validar entrada
+        const { title, description } = req.body;
+
+        // Validar que title y description no estén vacíos
+        const validation = validarTaskInput(title, description);
+
+        if (!validation.valid) {
+            return res.status(400).json({ error: validation.message });
         }
 
-        return res.status(200).json(tasks);
-        
-    } catch (error) {
-        return res.status(500).json({ error: 'Error al obtener tareas' });
-    }
-}
-
-const createTaskController = async (req, res) => {
-    // Validar entrada
-    const { title, description } = req.body;
-
-    // Validar que title y description no estén vacíos
-    const validation = validarTaskInput(title, description);
-
-    if (!validation.valid) {
-        return res.status(400).json({ error: validation.message });
+        try {
+            const newTask = await taskModel.createTask(title, description);
+            return res.status(201).json(newTask);
+        } catch (error) {
+            return res.status(500).json({ error: 'Error al crear tarea' });
+        }
     }
 
-    try {
-        const newTask = await taskModel.createTask(title, description);
-        return res.status(201).json(newTask);
-    } catch (error) {
-        return res.status(500).json({ error: 'Error al crear tarea' });
-    }
-}
+    static  updateTaskController = async (req, res) => {
+        const { id } = req.params;
+        const { title, description, completed } = req.body;
+        // Validar entrada
+        const validation = validarTaskInput(title, description);
+        const completionValidation = validarTaskCompletionInput(completed);
 
-const updateTaskController = async (req, res) => {
-    const { id } = req.params;
-    const { title, description, completed } = req.body;
-    // Validar entrada
-    const validation = validarTaskInput(title, description);
-    const completionValidation = validarTaskCompletionInput(completed);
+        if (!completionValidation.valid) {
+            return res.status(400).json({ error: completionValidation.message });
+        }
 
-    if (!completionValidation.valid) {
-        return res.status(400).json({ error: completionValidation.message });
-    }
+        if (!validation.valid) {
+            return res.status(400).json({ error: validation.message });
+        }
 
-    if (!validation.valid) {
-        return res.status(400).json({ error: validation.message });
-    }
-
-    try {
-        const updatedTask = await taskModel.updateTask(id, title, description, completed);
-        return res.status(200).json(updatedTask);
-    } catch (error) {
-        return res.status(500).json({ error: 'Error al actualizar tarea' });
-    }
-}
-
-function validarTaskInput(title, description) {
-
-    // Validar que title y description sean cadenas de texto
-    if (typeof title !== 'string' || typeof description !== 'string') {
-        return { valid: false, message: 'Title y description debe ser una cadena de texto' };
+        try {
+            const updatedTask = await taskModel.updateTask(id, title, description, completed);
+            return res.status(200).json(updatedTask);
+        } catch (error) {
+            return res.status(500).json({ error: 'Error al actualizar tarea' });
+        }
     }
 
-    // Validar que title y description no estén vacíos
-    if (!title || !description) {
-        return { valid: false, message: 'Title y description es requerido' };
+    static validarTaskInput(title, description) {
+
+        // Validar que title y description sean cadenas de texto
+        if (typeof title !== 'string' || typeof description !== 'string') {
+            return { valid: false, message: 'Title y description debe ser una cadena de texto' };
+        }
+
+        // Validar que title y description no estén vacíos
+        if (!title || !description) {
+            return { valid: false, message: 'Title y description es requerido' };
+        }
+
+        // Validar que title y description no estén compuestos solo por espacios
+        if (title.trim() === '' || description.trim() === '') {
+            return { valid: false, message: 'Title y Description no puede estar vacío' };
+        }
+
+        // Validar que title y description no excedan cierta longitud (por ejemplo, 255 caracteres)
+        if (description.length > 255) {
+            return { valid: false, message: 'Title y description no pueden exceder 255 caracteres' };
+        }
+        else if (title.length > 200) {
+            return { valid: false, message: 'Title no puede exceder 200 caracteres' };
+        }
+
+        return { valid: true };
     }
 
-    // Validar que title y description no estén compuestos solo por espacios
-    if (title.trim() === '' || description.trim() === '') {
-        return { valid: false, message: 'Title y Description no puede estar vacío' };
+    static validarTaskCompletionInput(completed) {
+        // Validar que completed sea un valor booleano
+        if (typeof completed !== 'boolean') {
+            return { valid: false, message: 'Completed debe ser un valor booleano' };
+        }
+
+        return { valid: true };
     }
 
-    // Validar que title y description no excedan cierta longitud (por ejemplo, 255 caracteres)
-    if (description.length > 255) {
-        return { valid: false, message: 'Title y description no pueden exceder 255 caracteres' };
-    }
-    else if (title.length > 200) {
-        return { valid: false, message: 'Title no puede exceder 200 caracteres' };
-    }
-
-    return { valid: true };
-}
-
-function validarTaskCompletionInput(completed) {
-    // Validar que completed sea un valor booleano
-    if (typeof completed !== 'boolean') {
-        return { valid: false, message: 'Completed debe ser un valor booleano' };
-    }
-
-    return { valid: true };
 }
 
 
-module.exports = { getTasksController, createTaskController, updateTaskController };
+
+module.exports = TaskController;
