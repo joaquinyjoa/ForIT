@@ -15,6 +15,7 @@ export default function TaskList() {
         fetch(`${API}/tasks`)
             .then(res => res.json())
             .then(data => {
+                console.log(data); // 👈 mirar esto
                 const formattedTasks: Task[] = data.map((task: any) => ({
                     ...task,
                     createdAt: new Date(task.createdAt)

@@ -6,8 +6,8 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<TaskList />} />
-      <Route path="/tasks/new" element={<TaskForm />} />
-      <Route path="/tasks/:id/edit" element={<TaskForm />} />
+      <Route path="/new" element={<TaskForm />} />
+      <Route path="/:id/edit" element={<TaskForm />} />
     </Routes>
   )
 }

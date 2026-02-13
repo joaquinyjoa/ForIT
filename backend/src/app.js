@@ -8,9 +8,9 @@ const app = express();
 const PORT = process.env.PORT;
 
 // Routes
+app.use(cors()); // Middleware para habilitar CORS
 app.use(express.json()); // Middleware para parsear JSON en las solicitudes
 app.use('/tasks', taskRoutes);
-app.use(cors()); // Middleware para habilitar CORS
 
 app.listen(PORT, () => 
     {

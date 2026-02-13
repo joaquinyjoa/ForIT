@@ -11,7 +11,7 @@ const createTableQuery = `CREATE TABLE IF NOT EXISTS tasks (
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     completed BOOLEAN NOT NULL DEFAULT 0,
-    createdAT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )`;
 
 //ruta de la base de datos
