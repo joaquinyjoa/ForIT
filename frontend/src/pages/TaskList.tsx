@@ -3,95 +3,119 @@ import { Link } from "react-router-dom";
 import type { Task } from "../types/Task";
 import TaskItem from "../components/TaskItem";
 
-// Obtenemos la URL de la API desde las variables de entorno
 const API = import.meta.env.VITE_API_URL;
 
 export default function TaskList() {
-    // Estado para almacenar las tareas
-    const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    // Estado para manejar errores
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
+  // Estados para filtros
+  const [search, setSearch] = useState("");
+  const [completedFilter, setCompletedFilter] = useState("all");
 
-    // Efecto para cargar las tareas al montar el componente
-    useEffect(() => {
-        const fetchTasks = async () => {
-            try{
-                setLoading(true);
-                setError(null);
+  const fetchTasks = async (filters?: { search?: string; completed?: string }) => {
+    try {
+      setLoading(true);
+      setError(null);
 
-                const res = await fetch(`${API}/tasks`);
-                
-                if (!res.ok){
-                    throw new Error("Error al cargar tareas");
-                }
+      const params = new URLSearchParams();
+      if (filters?.search) params.append("search", filters.search);
+      if (filters?.completed && filters.completed !== "all") params.append("completed", filters.completed);
 
-                const data = await res.json();
+      const res = await fetch(`${API}/tasks?${params.toString()}`);
+      if (!res.ok) throw new Error("Error al cargar tareas");
 
-                if (!Array.isArray(data)) {
-                    throw new Error("Formato invalido del servidor");
-                }
+      const data = await res.json();
+      if (!Array.isArray(data)) throw new Error("Formato inválido del servidor");
 
-                // Convertimos las fechas a objetos Date
-                const tasks: Task[] = data.map((task: any) => ({
-                    ...task,
-                    createdAt: new Date(task.createdAt)
-                }));
+      const tasks: Task[] = data.map((task: any) => ({
+        ...task,
+        createdAt: new Date(task.createdAt),
+      }));
 
-                setTasks(tasks);
+      setTasks(tasks);
+    } catch (error: any) {
+      console.error(error);
+      if (error.message === "Failed to fetch") {
+        setError("No se pudo conectar con el servidor. Verifique que el backend esté corriendo.");
+      } else {
+        setError("Hubo un error al cargar las tareas.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            }catch (error: any) {
-                console.error(error);
-                if (error.message === "Failed to fetch") {
-                    setError("No se pudo conectar con el servidor. Verifique que el backend esté corriendo.");
-                }
-                else {
-                    setError("Hubo un error al cargar las tareas.");
-                }
-            }finally {
-                setLoading(false);
-            }
-            };
-        fetchTasks();
-    }, []);
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
-   const handleDelete = (id: number) => {
-        setTasks(prev => prev.filter(t => t.id !== id));
-    };
+  const handleDelete = (id: number) => {
+    setTasks(prev => prev.filter(t => t.id !== id));
+  };
 
-    return (
-        <div className="container mt-4">
-            {error && (
-                <div className="alert alert-danger alert-dismissible fade show" role="alert">
-                    {error}
-                    <button
-                        type="button"
-                        className="btn-close"
-                        onClick={() => setError(null)}
-                    ></button>
-                </div>
-            )}
-            <h1>Lista de Tareas</h1>
-            <Link to="/new" className="btn btn-primary mb-3">
-                Crear Tarea
-            </Link>
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchTasks({ search, completed: completedFilter });
+  };
 
-            {loading ? (
-                <p>Cargando tareas...</p>
-            ) : tasks.length === 0 ? (
-                <p>No hay tareas disponibles.</p>
-            ) : (
-                <div className="list-group">
-                    {tasks.map(task => (
-                        <TaskItem
-                            key={task.id}
-                            task={task}
-                            onDelete={() => handleDelete(task.id)}
-                        />
-                    ))}
-                </div>
-            )}
+  return (
+    <div className="container mt-4">
+      {error && (
+        <div className="alert alert-danger alert-dismissible fade show" role="alert">
+          {error}
+          <button type="button" className="btn-close" onClick={() => setError(null)}></button>
         </div>
-    );
+      )}
+
+      <h1>Lista de Tareas</h1>
+      <Link to="/new" className="btn btn-primary mb-3">
+        Crear Tarea
+      </Link>
+
+      {/* Formulario de filtros */}
+      <form className="mb-3" onSubmit={handleSearchSubmit}>
+        <div className="row g-2 align-items-center">
+          <div className="col-auto">
+            <input
+              type="text"
+              placeholder="Buscar..."
+              className="form-control"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="col-auto">
+            <select
+              className="form-select"
+              value={completedFilter}
+              onChange={e => setCompletedFilter(e.target.value)}
+            >
+              <option value="all">Todos</option>
+              <option value="true">Completadas</option>
+              <option value="false">Pendientes</option>
+            </select>
+          </div>
+          <div className="col-auto">
+            <button type="submit" className="btn btn-secondary">
+              Buscar
+            </button>
+          </div>
+        </div>
+      </form>
+
+      {loading ? (
+        <p>Cargando tareas...</p>
+      ) : tasks.length === 0 ? (
+        <p>No hay tareas disponibles.</p>
+      ) : (
+        <div className="list-group">
+          {tasks.map(task => (
+            <TaskItem key={task.id} task={task} onDelete={() => handleDelete(task.id)} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
