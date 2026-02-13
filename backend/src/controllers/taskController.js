@@ -6,7 +6,10 @@ const taskModel = useMemory ? require('../models/taskMemoryModel') : require('..
 class TaskController {
     static  getTasksController = async (req, res) => {
         try {
-            const tasks = await taskModel.getTasks();
+            // Obtener parámetros de consulta para búsqueda y filtrado
+            const {search, completed} = req.query;
+
+            const tasks = await taskModel.getTasksWithFilters({ search, completed });
 
             if (!tasks || tasks.length === 0) {
                 return res.status(200).json(tasks);

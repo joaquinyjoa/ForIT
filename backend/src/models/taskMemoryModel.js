@@ -1,12 +1,6 @@
 let task = [];
 let currentId = 1;
 
-const getTasks = () => {
-    return new Promise((resolve) => {
-        resolve(task);
-    });
-}
-
 const getTaskById = (id) => {
     return new Promise((resolve, reject) => {
         const foundTask = task.find(t => t.id === parseInt(id));
@@ -45,4 +39,22 @@ const deleteTask = (id) => {
     });
 }
 
-module.exports = { getTasks, createTask, updateTask, deleteTask, getTaskById };
+const getTasksWithFilters = (filters = {}) => {
+    let result = [...task];
+
+    if(filters.search){
+        const searchTerm = filters.search.toLowerCase();
+        result = result.filter(task => 
+            task.title.toLowerCase().includes(searchTerm) ||
+            task.description.toLowerCase().includes(searchTerm)
+        );
+    }
+
+    if (filters.completed !== undefined && filters.completed !== "all") {
+        const completed = filters.completed === "true";
+        result = result.filter(task => task.completed === completed);
+    }
+    return result;
+}
+
+module.exports = { createTask, updateTask, deleteTask, getTaskById, getTasksWithFilters };

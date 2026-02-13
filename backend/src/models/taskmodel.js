@@ -1,11 +1,30 @@
 const db = require('../config/db');
 
 // Obtener todas las tareas
-const getTasks = () => {
+const getTasksWithFilters = ({search, completed} = {}) => {
     // Consulta a la base de datos para obtener todas las tareas
     return new Promise((resolve, reject) => {
-        const query = "SELECT * FROM tasks";
-        db.all(query, [], (err, rows) => {
+        let query = "SELECT * FROM tasks";
+        const params: any[] = [];
+
+        const conditions = [];
+
+        if (search) {
+            conditions.push("(title LIKE ? OR description LIKE ?)");
+            const searchTerm = `%${search}%`;
+            params.push(searchTerm, searchTerm);
+        }
+
+        if (completed !== undefined && completed !== 'all') {
+            conditions.push("completed = ?");
+            params.push(completed === 'true' ? 1 : 0);
+        }
+
+        if (conditions.length > 0) {
+            query += " WHERE " + conditions.join(" AND ");
+        }
+
+        db.all(query, params, (err, rows) => {
             if (err) {
                 console.error('Error al obtener tareas:', err.message);
                 reject(err);
@@ -93,4 +112,4 @@ const deleteTask = (id) => {
     });
 }
 
-module.exports = { getTasks, createTask, updateTask, deleteTask, getTaskById};
+module.exports = { getTasksWithFilters, createTask, updateTask, deleteTask, getTaskById};
