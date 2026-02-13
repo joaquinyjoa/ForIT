@@ -84,28 +84,20 @@ class TaskController {
         }
     }
 
-    static validarTaskInput(title, description) {
+       static validarTaskInput(title, description) {
 
-        // Validar que title y description sean cadenas de texto
-        if (typeof title !== 'string' || typeof description !== 'string') {
-            return { valid: false, message: 'Title y description debe ser una cadena de texto' };
-        }
-
-        // Validar que title y description no estén vacíos
-        if (!title || !description) {
-            return { valid: false, message: 'Title y description es requerido' };
-        }
-
-        // Validar que title y description no estén compuestos solo por espacios
+        title = String(title);
+        description = String(description);
+// Validar que title y description no estén vacíos
         if (title.trim() === '' || description.trim() === '') {
             return { valid: false, message: 'Title y Description no puede estar vacío' };
         }
-
-        // Validar que title y description no excedan cierta longitud (por ejemplo, 255 caracteres)
+        // Validar longitud de title y description
         if (description.length > 255) {
-            return { valid: false, message: 'Title y description no pueden exceder 255 caracteres' };
+            return { valid: false, message: 'Description no puede exceder 255 caracteres' };
         }
-        else if (title.length > 200) {
+        // Validar longitud de title
+        if (title.length > 200) {
             return { valid: false, message: 'Title no puede exceder 200 caracteres' };
         }
 
@@ -114,15 +106,18 @@ class TaskController {
 
     static validarTaskCompletionInput(completed) {
         // Validar que completed sea un valor booleano
-        if (typeof completed !== 'boolean') {
-            return { valid: false, message: 'Completed debe ser un valor booleano' };
+        if (
+            typeof completed !== 'boolean' &&
+            completed !== 0 &&
+            completed !== 1
+        ) {
+            return { valid: false, message: 'Completed debe ser boolean o 0/1' };
         }
 
         return { valid: true };
     }
 
 }
-
 
 
 module.exports = TaskController;

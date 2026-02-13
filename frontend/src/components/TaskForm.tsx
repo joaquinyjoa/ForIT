@@ -31,7 +31,7 @@ export default function TaskForm() {
 
                 setTitle(task.title);
                 setDescription(task.description);
-                setCompleted(task.completed);
+                setCompleted(Boolean(task.completed));
             });
     }, [id]);
 
