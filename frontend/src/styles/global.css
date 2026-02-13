@@ -1,0 +1,33 @@
+/* fondo general */
+body{
+    background-color: #f4f6f9;
+}
+
+/* titulo principal */
+h1{
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* card personalizada para tareas */
+.task-card{
+    border-radius: 10px;
+    transition: all 0.2s ease-in-out;
+}
+
+.task-card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* botones */
+.btn{
+    border-radius: 8px;
+}
+
+/* contenedor principal */
+.container{
+    max-width: 700px;
+}
+

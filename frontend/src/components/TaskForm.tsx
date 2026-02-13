@@ -14,6 +14,9 @@ export default function TaskForm() {
     const [completed, setCompleted] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    // Estado para manejar errores
+    const [error, setError] = useState<string | null>(null);
+
     // Efecto para cargar la tarea si estamos editando
     useEffect(() => {
         if (!id) return;
@@ -39,7 +42,7 @@ export default function TaskForm() {
         const taskData = {
             title,
             description,
-            completed
+            completed: id ? completed : false
         };
 
         try {
@@ -66,9 +69,14 @@ export default function TaskForm() {
             }
 
             navigate("/");
-        } catch (error) {
-            console.error(error);
-            alert("Hubo un error al guardar la tarea");
+        } catch (error: any) {
+            // Manejo de errores
+           if (error.message === "Failed to fetch") {
+                setError("No se pudo conectar con el servidor. Verifique que el backend esté corriendo.");
+            } else {
+                setError("Hubo un error al conectar con la base de datos.");
+            }
+            
         }finally {
             setLoading(false);
         }
@@ -77,6 +85,16 @@ export default function TaskForm() {
     return (
         <div className="container mt-4">
             <h1>{id ? "Editar Tarea" : "Crear Tarea"}</h1>
+            {error && (
+                <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                    {error}
+                    <button
+                        type="button"
+                        className="btn-close"
+                        onClick={() => setError(null)}
+                    ></button>
+                </div>
+            )}
             <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                     <label className="form-label">Título</label>
@@ -97,15 +115,20 @@ export default function TaskForm() {
                         required
                     />
                 </div>
-                <div className="mb-3 form-check">
-                    <input
-                        type="checkbox"
-                        className="form-check-input"
-                        checked={completed}
-                        onChange={e => setCompleted(e.target.checked)}
-                    />
-                    <label className="form-check-label">Completada</label>
-                </div>
+                {id && (
+                    <div className="mb-3 form-check">
+                        <input
+                            type="checkbox"
+                            className="form-check-input"
+                            id="completedCheck"
+                            checked={completed}
+                            onChange={e => setCompleted(e.target.checked)}
+                        />
+                        <label className="form-check-label" htmlFor="completedCheck">
+                            Marcar como completada
+                        </label>
+                    </div>
+                )}
                 <button type="submit" className="btn btn-primary" disabled={loading}>
                     {loading ? "Guardando..." : "Guardar"}
                 </button>
