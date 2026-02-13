@@ -70,6 +70,11 @@ class TaskController {
 
         try {
             const updatedTask = await taskModel.updateTask(id, title, description, completed);
+            
+            if (!updatedTask) {
+                return res.status(404).json({ error: 'Tarea no encontrada' });
+            }
+
             return res.status(200).json(updatedTask);
         } catch (error) {
             return res.status(500).json({ error: 'Error al actualizar tarea' });
@@ -81,6 +86,11 @@ class TaskController {
 
         try {
             const result = await taskModel.deleteTask(id);
+
+            if (!result) {
+                return res.status(404).json({ error: 'Tarea no encontrada' });
+            }
+
             return res.status(200).json(result);
         } catch (error) {
             return res.status(500).json({ error: 'Error al eliminar tarea' });
@@ -91,6 +101,7 @@ class TaskController {
 
         title = String(title);
         description = String(description);
+        
 // Validar que title y description no estén vacíos
         if (title.trim() === '' || description.trim() === '') {
             return { valid: false, message: 'Title y Description no puede estar vacío' };
