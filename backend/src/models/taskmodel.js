@@ -16,6 +16,20 @@ const getTasks = () => {
     });
 }
 
+const getTaskById = (id) => {
+    return new Promise((resolve, reject) => {
+        const query = "SELECT * FROM tasks WHERE id = ?";
+        db.get(query, [id], (err, row) => {
+            if (err) {
+                console.error('Error al obtener tarea por ID:', err.message);
+                reject(err);
+            } else {
+                resolve(row);
+            }
+        });
+    });
+}
+
 // Crear una nueva tarea
 const createTask = (title, description) => {
     // Ingreso de datos 
@@ -79,4 +93,4 @@ const deleteTask = (id) => {
     });
 }
 
-module.exports = { getTasks, createTask, updateTask, deleteTask };
+module.exports = { getTasks, createTask, updateTask, deleteTask, getTaskById};

@@ -35,6 +35,21 @@ class TaskController {
         }
     }
 
+    static getTaskByIdController = async (req, res) => {
+        const { id } = req.params;
+        try {
+            const task = await taskModel.getTaskById(id);
+
+            if (!task) {
+                return res.status(404).json({ error: 'Tarea no encontrada' });
+            }
+
+            return res.status(200).json(task);
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
     static  updateTaskController = async (req, res) => {
         const { id } = req.params;
         const { title, description, completed } = req.body;

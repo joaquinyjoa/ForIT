@@ -7,7 +7,7 @@ function App() {
     <Routes>
       <Route path="/" element={<TaskList />} />
       <Route path="/new" element={<TaskForm />} />
-      <Route path="/:id/edit" element={<TaskForm />} />
+      <Route path="/edit/:id" element={<TaskForm />} />
     </Routes>
   )
 }
