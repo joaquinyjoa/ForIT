@@ -1,4 +1,7 @@
-const taskModel = require('../models/taskmodel');
+// Importar el modelo de tareas
+const useMemory = process.env.USE_MEMORY === 'true';
+// Si USE_MEMORY es true, se usará el modelo en memoria, de lo contrario se usará el modelo con base de datos
+const taskModel = useMemory ? require('../models/taskMemoryModel') : require('../models/taskmodel');
 
 class TaskController {
     static  getTasksController = async (req, res) => {
@@ -6,7 +9,7 @@ class TaskController {
             const tasks = await taskModel.getTasks();
 
             if (!tasks || tasks.length === 0) {
-                return res.status(404).json({ error: 'No se encontraron tareas' });
+                return res.status(200).json(tasks);
             }
 
             return res.status(200).json(tasks);
