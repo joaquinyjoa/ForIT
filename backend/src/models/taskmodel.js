@@ -5,6 +5,7 @@ const getTasksWithFilters = ({search, completed, fromDate, toDate} = {}) => {
     // Consulta a la base de datos para obtener todas las tareas
     return new Promise((resolve, reject) => {
         let query = "SELECT * FROM tasks";
+
         // Parámetros para la consulta
         const params = [];
         const conditions = [];
@@ -16,24 +17,46 @@ const getTasksWithFilters = ({search, completed, fromDate, toDate} = {}) => {
             params.push(searchTerm, searchTerm);
         }
 
+        // Agregar condición de completado si se proporciona
         if (completed !== undefined && completed !== 'all') {
             conditions.push("completed = ?");
             params.push(completed === 'true' ? 1 : 0);
         }
 
+        // Agregar condiciones a la consulta si existen
         if (conditions.length > 0) {
             query += " WHERE " + conditions.join(" AND ");
         }
 
-        if (fromDate && toDate) {
-            conditions.push("created_at BETWEEN ? AND DATE(?)");
-            params.push(fromDate, toDate);
-        } else if (fromDate) {
-            conditions.push("created_at >= DATE(?)");
+        // Aplicar filtros de fecha
+        let from = null;
+        let to = null;
+
+        // Agregar condiciones de fecha si se proporcionan
+        if(fromDate){
+            from = new Date(fromDate);
+            if (isNaN(from.getTime())) {
+                throw new Error('Fecha de inicio no válida');
+            }
+            conditions.push("DATE(createdAt) >= DATE(?)");
             params.push(fromDate);
-        } else if (toDate) {
-            conditions.push("created_at <= DATE(?)");
+        }
+
+        if(toDate){
+            to = new Date(toDate);
+            if (isNaN(to.getTime())) {
+                throw new Error('Fecha de fin no válida');
+            }
+            conditions.push("DATE(createdAt) <= DATE(?)");
             params.push(toDate);
+        }
+
+        if (from && to && from > to) {
+            throw new Error('La fecha de inicio no puede ser mayor que la fecha de fin');
+        }
+
+        if (conditions.length > 0) {
+            query += " WHERE " + conditions.join(" AND ");
         }
 
         // Ejecutar la consulta con los parámetros

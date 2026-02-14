@@ -132,6 +132,13 @@ export default function TaskForm() {
                 <button type="submit" className="btn btn-primary" disabled={loading}>
                     {loading ? "Guardando..." : "Guardar"}
                 </button>
+                <button
+                    type="button"
+                    className="btn btn-secondary ms-2"
+                    onClick={() => navigate(-1)}
+                    >
+                    Volver
+                </button>
             </form>
         </div>
     );

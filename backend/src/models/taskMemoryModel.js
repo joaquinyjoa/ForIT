@@ -42,6 +42,11 @@ const deleteTask = (id) => {
 const getTasksWithFilters = (filters = {}) => {
     let result = [...task];
 
+    // Variables para fechas
+    let from = null;
+    let to = null;
+
+    // Aplicar filtros de búsqueda
     if(filters.search){
         const searchTerm = filters.search.toLowerCase();
         result = result.filter(task => 
@@ -50,30 +55,39 @@ const getTasksWithFilters = (filters = {}) => {
         );
     }
 
+    // Aplicar filtros de completado
     if (filters.completed !== undefined && filters.completed !== "all") {
         const completed = filters.completed === "true";
         result = result.filter(task => task.completed === completed);
     }
 
-    if (filters.fromDate && filters.toDate) {
-        const fromDate = new Date(filters.fromDate);
-        const toDate = new Date(filters.toDate);
-        result = result.filter(task => {
-            const createdAt = new Date(task.createdAt);
-            return createdAt >= fromDate && createdAt <= toDate;
-        });
-    } else if (filters.fromDate) {
-        const fromDate = new Date(filters.fromDate);
-        result = result.filter(task => {
-            const createdAt = new Date(task.createdAt);
-            return createdAt >= fromDate;
-        });
-    } else if (filters.toDate) {
-        const toDate = new Date(filters.toDate);
-        result = result.filter(task => {
-            const createdAt = new Date(task.createdAt);
-            return createdAt <= toDate;
-        });
+    // Aplicar filtros de fecha
+    if (filters.fromDate) {
+        from = new Date(filters.fromDate);
+        if (isNaN(from.getTime())) {
+            throw new Error("Fecha 'desde' inválida");
+        }
+    }
+
+    if (filters.toDate) {
+        to = new Date(filters.toDate);
+        if (isNaN(to.getTime())) {
+            throw new Error("Fecha 'hasta' inválida");
+        }
+        to.setHours(23, 59, 59, 999);
+    }
+
+    if (from && to && from > to) {
+        throw new Error("La fecha 'desde' no puede ser mayor que la fecha 'hasta'");
+    }
+
+    //Aplicar filtros
+    if (from) {
+        result = result.filter(t => new Date(t.createdAt) >= from);
+    }
+
+    if (to) {
+        result = result.filter(t => new Date(t.createdAt) <= to);
     }
 
     return result;

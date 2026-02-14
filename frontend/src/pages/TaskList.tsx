@@ -27,6 +27,12 @@ export default function TaskList() {
       // Agregar filtros a la consulta
       if (filters?.search) params.append("search", filters.search);
       if (filters?.completed && filters.completed !== "all") params.append("completed", filters.completed);
+
+      if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+        setError("La fecha de inicio no puede ser mayor que la fecha de fin.");
+        return;
+      }
+      
       if (filters?.fromDate) params.append("fromDate", filters.fromDate);
       if (filters?.toDate) params.append("toDate", filters.toDate);
 
@@ -87,6 +93,7 @@ export default function TaskList() {
       <form className="mb-3" onSubmit={handleSearchSubmit}>
         <div className="row g-2 align-items-center">
           <div className="col-auto">
+            {/* Campo de búsqueda */}
             <input
               type="text"
               placeholder="Buscar..."
@@ -101,11 +108,13 @@ export default function TaskList() {
               value={completedFilter}
               onChange={e => setCompletedFilter(e.target.value)}
             >
+              {/* Opciones de filtro */}
               <option value="all">Todos</option>
               <option value="true">Completadas</option>
               <option value="false">Pendientes</option>
             </select>
           </div>
+          {/* Filtros de fecha */}
           <div className="col-auto">
             <input
               type="date"
