@@ -1,7 +1,7 @@
 const db = require('../config/db');
 
 // Obtener todas las tareas
-const getTasksWithFilters = ({search, completed} = {}) => {
+const getTasksWithFilters = ({search, completed, fromDate, toDate} = {}) => {
     // Consulta a la base de datos para obtener todas las tareas
     return new Promise((resolve, reject) => {
         let query = "SELECT * FROM tasks";
@@ -23,6 +23,17 @@ const getTasksWithFilters = ({search, completed} = {}) => {
 
         if (conditions.length > 0) {
             query += " WHERE " + conditions.join(" AND ");
+        }
+
+        if (fromDate && toDate) {
+            conditions.push("created_at BETWEEN ? AND DATE(?)");
+            params.push(fromDate, toDate);
+        } else if (fromDate) {
+            conditions.push("created_at >= DATE(?)");
+            params.push(fromDate);
+        } else if (toDate) {
+            conditions.push("created_at <= DATE(?)");
+            params.push(toDate);
         }
 
         // Ejecutar la consulta con los parámetros

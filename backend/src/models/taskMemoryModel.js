@@ -22,7 +22,7 @@ const updateTask = (id, title, description, completed) => {
         if (index === -1) {
             reject(new Error('Tarea no encontrada'));
         }
-        task[index] = { id: parseInt(id), title, description, completed };
+        task[index] = { ...task[index], title, description, completed };
         resolve(task[index]);
     }
     );
@@ -54,6 +54,28 @@ const getTasksWithFilters = (filters = {}) => {
         const completed = filters.completed === "true";
         result = result.filter(task => task.completed === completed);
     }
+
+    if (filters.fromDate && filters.toDate) {
+        const fromDate = new Date(filters.fromDate);
+        const toDate = new Date(filters.toDate);
+        result = result.filter(task => {
+            const createdAt = new Date(task.createdAt);
+            return createdAt >= fromDate && createdAt <= toDate;
+        });
+    } else if (filters.fromDate) {
+        const fromDate = new Date(filters.fromDate);
+        result = result.filter(task => {
+            const createdAt = new Date(task.createdAt);
+            return createdAt >= fromDate;
+        });
+    } else if (filters.toDate) {
+        const toDate = new Date(filters.toDate);
+        result = result.filter(task => {
+            const createdAt = new Date(task.createdAt);
+            return createdAt <= toDate;
+        });
+    }
+
     return result;
 }
 
