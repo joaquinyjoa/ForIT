@@ -13,15 +13,22 @@ export default function TaskList() {
   // Estados para filtros
   const [search, setSearch] = useState("");
   const [completedFilter, setCompletedFilter] = useState("all");
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
 
-  const fetchTasks = async (filters?: { search?: string; completed?: string }) => {
+  // Función para cargar tareas con filtros opcionales
+  const fetchTasks = async (filters?: { search?: string; completed?: string; fromDate?: string; toDate?: string }) => {
     try {
       setLoading(true);
       setError(null);
 
       const params = new URLSearchParams();
+
+      // Agregar filtros a la consulta
       if (filters?.search) params.append("search", filters.search);
       if (filters?.completed && filters.completed !== "all") params.append("completed", filters.completed);
+      if (filters?.fromDate) params.append("fromDate", filters.fromDate);
+      if (filters?.toDate) params.append("toDate", filters.toDate);
 
       const res = await fetch(`${API}/tasks?${params.toString()}`);
       if (!res.ok) throw new Error("Error al cargar tareas");
@@ -51,13 +58,15 @@ export default function TaskList() {
     fetchTasks();
   }, []);
 
+  // Función para eliminar una tarea localmente después de eliminarla en el backend
   const handleDelete = (id: number) => {
     setTasks(prev => prev.filter(t => t.id !== id));
   };
 
+  // Función para manejar el envío del formulario de búsqueda
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchTasks({ search, completed: completedFilter });
+    fetchTasks({ search, completed: completedFilter, fromDate, toDate });
   };
 
   return (
@@ -96,6 +105,22 @@ export default function TaskList() {
               <option value="true">Completadas</option>
               <option value="false">Pendientes</option>
             </select>
+          </div>
+          <div className="col-auto">
+            <input
+              type="date"
+              className="form-control"
+              value={fromDate}
+              onChange={e => setFromDate(e.target.value)}
+            />
+          </div>
+          <div className="col-auto">
+            <input
+              type="date"
+              className="form-control"
+              value={toDate}
+              onChange={e => setToDate(e.target.value)}
+            />
           </div>
           <div className="col-auto">
             <button type="submit" className="btn btn-secondary">

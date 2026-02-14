@@ -5,10 +5,11 @@ const getTasksWithFilters = ({search, completed} = {}) => {
     // Consulta a la base de datos para obtener todas las tareas
     return new Promise((resolve, reject) => {
         let query = "SELECT * FROM tasks";
-        const params: any[] = [];
-
+        // Parámetros para la consulta
+        const params = [];
         const conditions = [];
 
+        // Agregar condiciones de búsqueda y filtrado si se proporcionan
         if (search) {
             conditions.push("(title LIKE ? OR description LIKE ?)");
             const searchTerm = `%${search}%`;
@@ -24,6 +25,7 @@ const getTasksWithFilters = ({search, completed} = {}) => {
             query += " WHERE " + conditions.join(" AND ");
         }
 
+        // Ejecutar la consulta con los parámetros
         db.all(query, params, (err, rows) => {
             if (err) {
                 console.error('Error al obtener tareas:', err.message);
@@ -37,7 +39,7 @@ const getTasksWithFilters = ({search, completed} = {}) => {
 
 const getTaskById = (id) => {
     return new Promise((resolve, reject) => {
-        const query = "SELECT * FROM tasks WHERE id = ?";
+        let query = "SELECT * FROM tasks WHERE id = ?";
         db.get(query, [id], (err, row) => {
             if (err) {
                 console.error('Error al obtener tarea por ID:', err.message);
